@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'ruby-prof'
 
 describe FarMar::Product do
 
@@ -22,23 +23,16 @@ describe FarMar::Product do
     it "find the first product by market 1" do
       expect(FarMar::Product.by_vendor(1).first.name).to eq "Dry Beets"
     end
-# these two are slow tests??
-    describe "#revenue_hash" do
-      let(:rev_hash) { FarMar::Product.revenue_hash }
-      it "returns a hash" do
-        expect(rev_hash.class).to eq Hash
-      end
-
-      it "returns Product #2 for revenue 5727" do
-        expect(((rev_hash.key(5727))).id).to eq 2
-     end
-   end
-
 
     describe "#most_revenue" do
       let(:rev_array) { FarMar::Product.most_revenue(50)}
       it "returns an array of product objects" do
-        expect((rev_array[0]).class).to eq FarMar::Product
+        result = RubyProf.profile do
+          expect((rev_array[0]).class).to eq FarMar::Product
+        end
+
+        printer = RubyProf::GraphPrinter.new(result)
+        printer.print(STDOUT, {})
       end
 
       it "returns an array length 3 for top 3" do
